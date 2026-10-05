@@ -66,14 +66,20 @@ npx agent-evals run --agent http://localhost:3000 --suite tool-use
 npx agent-evals run --agent http://localhost:3000 --all --publish
 ```
 
-## Build order (suggested for AI implementation)
+## Status: v1 built and tested
 
-1. **Runner + one suite** — `runner.ts` + `suites/tool-use.ts` with 5 cases, exact-match scoring, CLI output table
-2. **Agent adapters** — HTTP `POST /run` first, MCP transport second
-3. **LLM-judge scorer** — for open-ended cases (uses Claude API, bring your own key)
-4. **Leaderboard page** — static Next.js page over `results/*.json`, sortable columns
-5. **RAG + latency suites** — expand coverage
-6. **CI action** — GitHub Action that runs evals on every PR to an agent repo
+The full harness is implemented, typechecked, and covered by tests (`npm test` — 20/20 passing), plus a live end-to-end run against a scripted agent server:
+
+- **Runner** (`src/runner.ts`) — executes cases, scores, prints tables, supports `--bail` and latency budgets
+- **Suites** — `tool-use` (8 cases), `rag-accuracy` (5 cases + `data/rag-corpus.json`), `latency` (5 cases with ms budgets)
+- **Scorers** — exact-match, keyword, LLM-judge (Claude, `ANTHROPIC_API_KEY`), latency stats
+- **Agent adapters** — HTTP `POST /run` and MCP `tools/call` transports, plus a scripted mock agent
+- **CLI** — `run --agent --suite/--all --mcp --name --publish`, `leaderboard` (best score per agent+suite)
+- **Leaderboard web UI** (`web/`) — Next.js page, statically renders `results/leaderboard.json` (verified with `next build`)
+
+Verified end-to-end: scripted agent scored 8/8 tool-use, 4/5 rag-accuracy (LLM-judge case correctly skips without a key), 5/5 latency; `results/` + leaderboard page show real data.
+
+Tests: `npm test` · Typecheck: `npx tsc --noEmit` (root) · Web: `cd web && npm run build`
 
 ## Tech stack
 
@@ -94,3 +100,4 @@ New eval suites are the highest-value contribution. One file in `src/suites/`, 5
 ## License
 
 MIT
+

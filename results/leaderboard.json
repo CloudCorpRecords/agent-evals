@@ -1,0 +1,29 @@
+[
+  {
+    "agent": "mock-perfect",
+    "suiteId": "latency",
+    "totalScore": 5,
+    "maxScore": 5,
+    "passRate": 1,
+    "avgLatencyMs": 3,
+    "startedAt": "2026-10-05T01:42:34.661Z"
+  },
+  {
+    "agent": "mock-perfect",
+    "suiteId": "tool-use",
+    "totalScore": 8,
+    "maxScore": 8,
+    "passRate": 1,
+    "avgLatencyMs": 11,
+    "startedAt": "2026-10-05T01:42:34.622Z"
+  },
+  {
+    "agent": "mock-perfect",
+    "suiteId": "rag-accuracy",
+    "totalScore": 4,
+    "maxScore": 5,
+    "passRate": 0.8,
+    "avgLatencyMs": 4,
+    "startedAt": "2026-10-05T01:42:34.646Z"
+  }
+]

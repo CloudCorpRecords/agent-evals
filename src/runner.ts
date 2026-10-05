@@ -1,54 +1,102 @@
-export interface EvalCase {
-  id: string;
-  input: string;
-  expected: { tool: string; args: Record<string, unknown> };
-  judge: "exact" | "llm";
+import type {
+  AgentFn,
+  CaseResult,
+  EvalCase,
+  EvalSuite,
+  SuiteResult,
+} from "./types.js";
+import { exactScorer, keywordScorer, llmJudgeScorer } from "./scorer.js";
+import { latencyStats } from "./scorer.js";
+
+export interface RunOptions {
+  /** fail the whole run if any case throws */
+  bail?: boolean;
+  onCase?: (r: CaseResult) => void;
 }
 
-export interface EvalSuite {
-  id: string;
-  name: string;
-  cases: EvalCase[];
-}
+async function scoreCase(c: EvalCase, agent: AgentFn): Promise<CaseResult> {
+  const maxScore = c.points ?? 1;
+  const started = Date.now();
+  try {
+    const out = await agent(c.input, c.tools);
+    const latencyMs = Date.now() - started;
+    const agentOut = { ...out, latencyMs };
 
-export interface RunResult {
-  passed: number;
-  total: number;
-  details: { id: string; pass: boolean; ms: number }[];
-}
+    let scored =
+      c.judge === "exact"
+        ? exactScorer(c, agentOut)
+        : c.judge === "keyword"
+          ? keywordScorer(c, agentOut)
+          : await llmJudgeScorer(c, agentOut);
 
-async function callAgent(agentUrl: string, input: string): Promise<any> {
-  const res = await fetch(`${agentUrl}/run`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ input }),
-  });
-  return res.json();
-}
+    let detail = scored.detail;
+    let score = scored.score;
+    if (c.expected.maxP95Ms !== undefined && latencyMs > c.expected.maxP95Ms) {
+      score = 0;
+      detail += ` | latency ${latencyMs}ms exceeded ${c.expected.maxP95Ms}ms budget`;
+    }
 
-function exactMatch(output: any, expected: EvalCase["expected"]): boolean {
-  return (
-    output?.tool === expected.tool &&
-    JSON.stringify(output?.args) === JSON.stringify(expected.args)
-  );
+    return {
+      caseId: c.id,
+      score: score * maxScore,
+      maxScore,
+      passed: score >= 1,
+      latencyMs,
+      detail,
+    };
+  } catch (err) {
+    return {
+      caseId: c.id,
+      score: 0,
+      maxScore,
+      passed: false,
+      latencyMs: Date.now() - started,
+      detail: `agent error: ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
 }
 
 export async function runSuite(
   suite: EvalSuite,
-  agentUrl: string
-): Promise<RunResult> {
-  const details: RunResult["details"] = [];
+  agent: AgentFn,
+  agentName: string,
+  opts: RunOptions = {}
+): Promise<SuiteResult> {
+  const cases: CaseResult[] = [];
   for (const c of suite.cases) {
-    const start = Date.now();
-    const output = await callAgent(agentUrl, c.input);
-    const pass = c.judge === "exact" ? exactMatch(output, c.expected) : false; // llm judge: TODO
-    const ms = Date.now() - start;
-    details.push({ id: c.id, pass, ms });
-    console.log(`${pass ? "PASS" : "FAIL"}  ${c.id}  (${ms}ms)`);
+    const r = await scoreCase(c, agent);
+    cases.push(r);
+    opts.onCase?.(r);
+    if (opts.bail && !r.passed) {
+      throw new Error(`bailing after failed case ${c.id}: ${r.detail}`);
+    }
   }
+  const totalScore = cases.reduce((a, c) => a + c.score, 0);
+  const maxScore = cases.reduce((a, c) => a + c.maxScore, 0);
+  const stats = latencyStats(cases.map((c) => c.latencyMs));
   return {
-    passed: details.filter((d) => d.pass).length,
-    total: details.length,
-    details,
+    suiteId: suite.id,
+    agent: agentName,
+    startedAt: new Date().toISOString(),
+    cases,
+    totalScore: Math.round(totalScore * 100) / 100,
+    maxScore,
+    passRate: cases.length ? cases.filter((c) => c.passed).length / cases.length : 0,
+    avgLatencyMs: stats.avg,
   };
+}
+
+export function printTable(result: SuiteResult): void {
+  console.log(`\n${result.suiteId} — ${result.agent}`);
+  console.log("─".repeat(72));
+  for (const c of result.cases) {
+    const mark = c.passed ? "✓" : "✗";
+    console.log(
+      `${mark} ${c.caseId.padEnd(22)} ${c.score}/${c.maxScore}  ${c.latencyMs}ms  ${c.detail.slice(0, 60)}`
+    );
+  }
+  console.log("─".repeat(72));
+  console.log(
+    `score ${result.totalScore}/${result.maxScore}  pass rate ${Math.round(result.passRate * 100)}%  avg latency ${result.avgLatencyMs}ms`
+  );
 }

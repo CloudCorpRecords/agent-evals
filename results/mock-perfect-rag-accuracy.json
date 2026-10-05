@@ -1,0 +1,51 @@
+{
+  "suiteId": "rag-accuracy",
+  "agent": "mock-perfect",
+  "startedAt": "2026-10-05T01:42:34.646Z",
+  "cases": [
+    {
+      "caseId": "rag-founder",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 6,
+      "detail": "all keywords present"
+    },
+    {
+      "caseId": "rag-product",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 4,
+      "detail": "all keywords present"
+    },
+    {
+      "caseId": "rag-pricing",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 3,
+      "detail": "all keywords present"
+    },
+    {
+      "caseId": "rag-hallucination-trap",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 4,
+      "detail": "all keywords present"
+    },
+    {
+      "caseId": "rag-open",
+      "score": 0,
+      "maxScore": 1,
+      "passed": false,
+      "latencyMs": 3,
+      "detail": "skipped: ANTHROPIC_API_KEY not set"
+    }
+  ],
+  "totalScore": 4,
+  "maxScore": 5,
+  "passRate": 0.8,
+  "avgLatencyMs": 4
+}

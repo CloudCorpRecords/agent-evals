@@ -1,0 +1,51 @@
+{
+  "suiteId": "latency",
+  "agent": "mock-perfect",
+  "startedAt": "2026-10-05T01:42:34.661Z",
+  "cases": [
+    {
+      "caseId": "lat-quick",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 3,
+      "detail": "all keywords present"
+    },
+    {
+      "caseId": "lat-medium",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 3,
+      "detail": "all keywords present"
+    },
+    {
+      "caseId": "lat-tool",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 2,
+      "detail": "correct tool call: ping"
+    },
+    {
+      "caseId": "lat-slow",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 2,
+      "detail": "all keywords present"
+    },
+    {
+      "caseId": "lat-echo",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 3,
+      "detail": "all keywords present"
+    }
+  ],
+  "totalScore": 5,
+  "maxScore": 5,
+  "passRate": 1,
+  "avgLatencyMs": 3
+}

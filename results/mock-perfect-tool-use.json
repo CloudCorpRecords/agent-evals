@@ -1,0 +1,75 @@
+{
+  "suiteId": "tool-use",
+  "agent": "mock-perfect",
+  "startedAt": "2026-10-05T01:42:34.622Z",
+  "cases": [
+    {
+      "caseId": "file-read",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 54,
+      "detail": "correct tool call: read_file"
+    },
+    {
+      "caseId": "file-write",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 6,
+      "detail": "correct tool call: write_file"
+    },
+    {
+      "caseId": "web-search",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 4,
+      "detail": "correct tool call: web_search"
+    },
+    {
+      "caseId": "calculator",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 4,
+      "detail": "correct tool call: calculator"
+    },
+    {
+      "caseId": "no-tool-needed",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 5,
+      "detail": "all keywords present"
+    },
+    {
+      "caseId": "wrong-tool-trap",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 4,
+      "detail": "correct tool call: delete_file"
+    },
+    {
+      "caseId": "summarize-call",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 5,
+      "detail": "correct tool call: summarize"
+    },
+    {
+      "caseId": "multi-keyword",
+      "score": 1,
+      "maxScore": 1,
+      "passed": true,
+      "latencyMs": 5,
+      "detail": "all keywords present"
+    }
+  ],
+  "totalScore": 8,
+  "maxScore": 8,
+  "passRate": 1,
+  "avgLatencyMs": 11
+}
